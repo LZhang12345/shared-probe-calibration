@@ -7,24 +7,38 @@ cluster launchers, and experiment outputs.
 
 ## Problem
 
-Let `F(z)` be a scalar model metric, where coordinate `z_i` scales an additive
-intervention on component `i`. At `z=0`, let
+Let $F:\mathbb{R}^N\rightarrow\mathbb{R}$ be a scalar model metric, where
+$z_i$ scales an additive intervention on component $i$. At $z=0$, define the
+attribution-patching vector $g$ and intervention-coordinate Hessian $G$ as
 
-- `g_i` be the attribution-patching estimate, or the first derivative of `F`;
-- `G_ii` be the diagonal of the intervention-coordinate Hessian.
+$$
+g_i=\left.\frac{\partial F}{\partial z_i}\right|_{z=0},
+\qquad
+G_{ij}=\left.\frac{\partial^2F}{\partial z_i\,\partial z_j}\right|_{z=0}.
+$$
 
-The second-order estimate for an isolated intervention is
+The second-order estimate of the isolated intervention effect for component
+$i$ is
 
-```
-g_i + 0.5 * G_ii
-```
+$$
+\widehat{\Delta}^{(2)}_i=g_i+\frac{1}{2}G_{ii}.
+$$
 
-Computing every diagonal entry exactly costs one basis HVP per component. The
-code here instead uses shared Rademacher probes on a calibration corpus:
+Computing every $G_{ii}$ exactly costs one basis HVP per component. Instead,
+draw a Rademacher vector $s\in\{-1,+1\}^N$. One shared HVP gives
 
-```
-diag(G) ~= mean_s s * (G @ s)
-```
+$$
+\widehat d(s)=s\odot(Gs),
+\qquad
+\mathbb{E}_s[\widehat d(s)]=\operatorname{diag}(G).
+$$
+
+With $R$ independent probes, the diagonal estimate is
+
+$$
+\widehat{\operatorname{diag}}(G)
+=\frac{1}{R}\sum_{r=1}^{R}s^{(r)}\odot\bigl(Gs^{(r)}\bigr).
+$$
 
 One probe gives a noisy observation for every component. These observations
 are not accurate enough to use as per-prompt corrections. The method therefore
@@ -34,7 +48,7 @@ across repeated analyses of the same model and task.
 ## Method
 
 1. Run a small number of shared probes on each calibration instance.
-2. For each component, fit `log |probe estimate|` from `log |AtP|`.
+2. For each component, predict $\log|G_{ii}|$ from $\log|g_i|$.
 3. Partially pool each component fit toward a fit over all components. The
    implementation uses the fixed weight `n / (n + 5)`, matching the experiments.
 4. On a new instance, rank components by predicted absolute curvature.
@@ -102,4 +116,3 @@ reproduce the reported model-scale numbers by itself; those runs require model
 weights, task data, activation hooks, and substantially more compute. The
 technical write-up reports the full experimental protocol, comparisons, and
 negative results.
-
