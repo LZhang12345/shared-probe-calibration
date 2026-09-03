@@ -30,13 +30,13 @@ draw a Rademacher vector $s\in\{-1,+1\}^N$. One shared HVP gives
 $$
 \widehat d(s)=s\odot(Gs),
 \qquad
-\mathbb{E}_s[\widehat d(s)]=\operatorname{diag}(G).
+\mathbb{E}_s[\widehat d(s)]=\mathrm{diag}(G).
 $$
 
 With $R$ independent probes, the diagonal estimate is
 
 $$
-\widehat{\operatorname{diag}}(G)
+\widehat{\mathrm{diag}}(G)
 =\frac{1}{R}\sum_{r=1}^{R}s^{(r)}\odot\bigl(Gs^{(r)}\bigr).
 $$
 
